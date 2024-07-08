@@ -1,17 +1,20 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
+	"io"
 	"jet/API"
 	"jet/API/Keygen"
 	"jet/StorageEngines"
-	"io"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func Serve(hostAndPort string, storage StorageEngines.Storage, keyGenerator Keygen.KeyGenerator) error {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(textPlain)
+	r.Use(cors.Default())
 	r.GET("/", func(c *gin.Context) {
 		content, err := API.AllKeys(storage)
 		if err != nil {
@@ -27,7 +30,7 @@ func Serve(hostAndPort string, storage StorageEngines.Storage, keyGenerator Keyg
 			c.AbortWithError(400, err)
 			return
 		}
-		_ , err = API.Set(storage, key,string(content))
+		_, err = API.Set(storage, key, string(content))
 		if err != nil {
 			c.AbortWithError(500, err)
 			return
