@@ -1,0 +1,83 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+  
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content= 
+        "width=device-width, initial-scale=1.0"> 
+    <meta http-equiv="X-UA-Compatible"
+            content="ie=edge"> 
+    <title>Select Test</title> 
+</head> 
+  
+<body> 
+
+    <select id="0_0_0"> 
+	<option value="-1">Select</option>
+	<option value="20">20</option>
+	<option value="40">40</option>
+	</select>
+
+
+<script>
+
+var populateSurvey=function(data){
+	var json=JSON.parse(data);
+	var selects = document.getElementsByTagName('select');
+	for(var i=0;i<selects.length;i++){
+		if (selects[i].id in json){
+			selects[i].value=json[selects[i].id];
+		}
+	}
+}
+
+var saveSurvey=function(){
+	var json={};
+	var selects = document.getElementsByTagName('select');
+	for(var i=0;i<selects.length;i++){
+		json[selects[i].id]=selects[i].value;
+	}
+	//now execute a put
+	fetch("https://www.kv.econlabs.org/"+surveyID, { 
+      method: 'PUT', 
+      headers: { 
+        'Content-type': 'text'
+      }, 
+      body: JSON.stringify(json) 
+    }).then((data)=>{console.log("data saved");}).catch((error)=>{console.log(error)});
+}
+
+//surveyID
+var surveyID="2024_07_08_generic";
+
+//populate survey when loading
+fetch("https://www.kv.econlabs.org/"+surveyID)
+  .then((response) => {
+    if (!response.ok) {
+	  //the key hasn't been saved yet
+	  console.log("no stored data");
+    }
+	else{
+		return response.text();	  
+	}
+  }).then((text) => {
+	populateSurvey(text);
+  }).catch((error) => {
+    console.log(error);
+  });
+
+
+//add change event listener to all selects
+var selects = document.getElementsByTagName('select');
+for(var i=0;i<selects.length;i++){
+	selects[i].addEventListener("change", () => {
+		saveSurvey();
+	});
+}
+ 
+
+</script>
+
+</body> 
+  
+</html> 
